@@ -28,6 +28,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/candidate/").permitAll()
                             .requestMatchers("/company/").permitAll()
                             .requestMatchers("/auth/company").permitAll()
+                            .requestMatchers("/candidate/auth").permitAll()
                             .requestMatchers(SWAGGER_LIST).permitAll()
                             .anyRequest().authenticated();
                 })
