@@ -15,6 +15,9 @@ public class SecurityConfig {
     @Autowired
     private SecurityFilter securityFilter;
 
+    @Autowired
+    private SecurityCandidateFilter securityCandidateFilter;
+
     private static final String[] SWAGGER_LIST = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
@@ -32,7 +35,9 @@ public class SecurityConfig {
                             .requestMatchers(SWAGGER_LIST).permitAll()
                             .anyRequest().authenticated();
                 })
-                .addFilterBefore(securityFilter, BasicAuthenticationFilter.class);
+                .addFilterBefore(securityFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(securityCandidateFilter, BasicAuthenticationFilter.class)
+        ;
         return http.build();
     }
 
