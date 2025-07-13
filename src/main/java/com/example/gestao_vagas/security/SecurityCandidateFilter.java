@@ -6,11 +6,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 public class SecurityCandidateFilter extends OncePerRequestFilter{
@@ -25,15 +27,19 @@ public class SecurityCandidateFilter extends OncePerRequestFilter{
         SecurityContextHolder.getContext().setAuthentication(null);
         String header = request.getHeader("Authorization");
 
-        if (header != null){
-            var token = jwtProvider.validateToken(header);
+        if (request.getRequestURI().startsWith("/candidate")){
+            if (header != null){
+                var token = jwtProvider.validateToken(header);
 
-            if (header == null){
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                if (token == null){
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
+                request.setAttribute("candidate_id", token.getSubject());
+                var roles = token.getClaim("roles").asList(Object.class);
+                var auth = new UsernamePasswordAuthenticationToken(token.getSubject(), null, Collections.emptyList());
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
-            request.setAttribute("candidate_id", token.getSubject());
-            System.out.println("===== TOKEN ===== \n"+token);
         }
         filterChain.doFilter(request, response);
     }
